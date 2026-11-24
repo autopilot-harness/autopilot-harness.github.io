@@ -5,7 +5,7 @@ AutoPILOT lets a model send one action, start a fixed sequence of actions, or wr
 
 [Project website](https://autopilot-harness.github.io/) · [Gameplay demos](https://autopilot-harness.github.io/#comparison) · [Paper PDF](https://autopilot-harness.github.io/assets/autopilot.pdf)
 
-[Code coming soon](https://github.com/markyyds/autopilot_harness).
+**Code coming soon.**
 
 ### Authors
 
