@@ -201,7 +201,7 @@
   </div>
 </section>
 <section id="method" class="section wrap">
-<h2>Three execution modes</h2><p class="lead">With GPT-6.1 Sol at low effort, median model latency was 6.1 s. The median time from one controller action to the next was 0.41 s. About half of it was the action duration that the model sets in the controller, and the rest was the screenshot and state read after the action.</p>
+<h2>Three execution modes</h2><p class="lead">With GPT-6.1 Sol at low effort, median model latency was 6.1 s. A controller step took 0.41 s at the median. About half of it was the action itself, whose length the model picks, and the rest was the screenshot and state read that follow.</p>
 <div class="modes"><article><code>act</code><h3>Primitive action</h3><p>Send one action. Stops any running macro or controller.</p></article><article><code>run_macro</code><h3>Open-loop macro</h3><p>Execute a sequence of actions without reading the screen.</p></article><article><code>python</code><h3>Closed-loop controller</h3><p>Run model-written Python that reads frames, acts and can hand control back.</p></article></div>
 <div class="delegation-analysis"><h3>When does the model delegate?</h3>
 <p>With GPT-6.1 Sol in real time, controllers send 98% of environment steps in hostile games and 89% in benign games. In turn-based games, where the model can plan ahead, open-loop macros account for 36% of tool calls and 26% of environment steps.</p>
