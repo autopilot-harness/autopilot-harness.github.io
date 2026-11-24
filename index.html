@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="AutoPILOT is a screen-only visual agent harness for real-time gameplay. Explore AFK-Bench and compare results across 120 games.">
+<meta name="theme-color" content="#102728">
+<title>AutoPILOT · A Visual Agent Harness for Real-Time Gameplay</title>
+<link rel="stylesheet" href="style.css?v=particles">
+<script defer src="data.js?v=effort"></script>
+<link rel="stylesheet" href="scroll-replay.css?v=duels">
+<script defer src="app.js?v=subsets"></script>
+<script defer src="afk-particles.js"></script>
+<script defer src="scroll-replay.js?v=duels"></script>
+<script defer src="paired-replay.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><nav aria-label="Main navigation" class="wrap"><a class="brand" href="#main"><span class="flight-mark" aria-hidden="true"><i></i><i></i><i></i></span>AutoPILOT</a><div class="links"><a href="#comparison">Demos</a><a href="#abstract">Abstract</a><a href="#method">Method</a><a href="#cases">Case studies</a><a href="#results">Results</a><a href="#analysis">Analysis</a><a href="#benchmark">AFK-Bench</a></div><select id="section-menu" aria-label="Jump to section"><option value="">Sections</option><option value="comparison">Demos</option><option value="abstract">Abstract</option><option value="method">Method</option><option value="benchmark">AFK-Bench</option><option value="results">Results</option><option value="analysis">Analysis</option><option value="cases">Case studies</option><option value="citation">Citation</option></select><a class="nav-paper" href="assets/autopilot.pdf">Paper PDF</a></nav></header>
+<main id="main">
+<section id="flight" aria-labelledby="project-name" data-scene="0">
+  <div class="flight-stage">
+    <div class="scene-layout">
+      <div class="scene-heading">
+        <p class="eyeline">Praxis Fighter X <span>/</span> <span id="harness-name">VISTA</span></p>
+        <h2 id="scene-title">Single-step harness</h2>
+        <p id="scene-description">At most one action per model call. The game keeps running.</p>
+      </div>
+      <div class="panels">
+        <div class="pane">
+          <div class="pane-label"><b id="left-label">Model input</b><span id="left-detail">0:38.04</span></div>
+          <div class="dock" id="frame-dock">
+            <div id="code-view" inert>
+              <div class="code-file">praxis-controller.py<button id="open-source" type="button" aria-haspopup="dialog">Expand ↗</button></div>
+              <pre tabindex="0" aria-label="Complete recorded Python controller"><code id="recorded-code"><span class="py-keyword">def</span> <span class="py-method">run</span>(api):
+ <span class="py-keyword">import</span> numpy <span class="py-keyword">as</span> np
+ <span class="py-keyword">for</span> i <span class="py-keyword">in</span> range(240):
+  o=api.<span class="py-method">observe</span>(); a=o.rgb
+  <span class="py-comment"># Blue hull pixels near the bottom identify current horizontal position.</span>
+  m=(a[560:680,:,2]&gt;100)&amp;(a[560:680,:,0]&lt;130)&amp;(a[560:680,:,1]&gt;70)
+  yy,xx=np.where(m); x=float(np.median(xx)) <span class="py-keyword">if</span> len(xx)&gt;10 <span class="py-keyword">else</span> 640
+  <span class="py-comment"># Bright magenta/red projectiles, excluding the side HUD.</span>
+  b=(a[:,:,0]&gt;235)&amp;(a[:,:,1]&lt;115)&amp;(a[:,:,2]&gt;35)
+  b[:300]=<span class="py-keyword">False</span>; b[:, :100]=<span class="py-keyword">False</span>; b[:,1180:]=<span class="py-keyword">False</span>
+  by,bx=np.where(b)
+  near=(abs(bx-x)&lt;150)&amp;(by&gt;390)
+  <span class="py-keyword">if</span> np.any(near):
+   threat=float(np.mean(bx[near])); direction=<span class="py-string">&#x27;ArrowRight&#x27;</span> <span class="py-keyword">if</span> threat&lt;x <span class="py-keyword">else</span> <span class="py-string">&#x27;ArrowLeft&#x27;</span>
+  <span class="py-keyword">else</span>:
+   direction=<span class="py-string">&#x27;ArrowRight&#x27;</span> <span class="py-keyword">if</span> (i//22)%2==0 <span class="py-keyword">else</span> <span class="py-string">&#x27;ArrowLeft&#x27;</span>
+  <span class="py-keyword">if</span> x&lt;220: direction=<span class="py-string">&#x27;ArrowRight&#x27;</span>
+  <span class="py-keyword">if</span> x&gt;1060: direction=<span class="py-string">&#x27;ArrowLeft&#x27;</span>
+<span data-op="act">  api.<span class="py-method">act</span>({<span class="py-string">&#x27;action&#x27;</span>:<span class="py-string">&#x27;press_keys&#x27;</span>,<span class="py-string">&#x27;keys&#x27;</span>:[<span class="py-string">&#x27;x&#x27;</span>,<span class="py-direction">direction</span>],<span class="py-string">&#x27;duration&#x27;</span>:0.18})</span>
+ api.<span class="py-method">request_handoff</span>(<span class="py-string">&#x27;Short firing/dodging trial finished; inspect score and lives.&#x27;</span>)</code></pre>
+            </div>
+          </div>
+          <p class="pane-caption" id="left-caption">Next action at 0:42.16 (4.12 s later).</p>
+        </div>
+        <div class="pane">
+          <div class="pane-label"><b>Re-enactment</b><output id="episode-time" aria-label="Elapsed wall time in the episode">0:37.50</output></div>
+          <div class="dock" id="video-dock"></div>
+          <div class="telemetry"><span id="runtime-state">Observing</span><button type="button" id="next-turn" title="Pause on the next recorded direction change">Next turn ›</button></div>
+        </div>
+      </div>
+      <div class="replay-instruments">
+        <div class="keyboard-box">
+          <div class="instrument-label"><button type="button" id="open-keyboard" aria-haspopup="dialog">Recorded keyboard ↗</button><output id="pressed-keys" aria-label="Requested keys">—</output></div>
+          <svg class="key-surface" viewBox="0 0 462 132" aria-hidden="true"><g id="keyboard-layout"></g></svg>
+        </div>
+        <div class="replay-meters">
+          <div class="instrument-label"><label for="replay-seek">Replay position</label><output id="clip-time">0:00 / 0:06</output></div>
+          <input id="replay-seek" type="range" min="0" max="6" step="0.01" value="0" aria-label="Scrub the current replay">
+          <div class="score-panel" id="score-panel">
+            <label class="score-title" for="task-meter">Best task progress</label>
+            <output id="task-value" aria-hidden="true">0%</output>
+            <span class="score-goal">5,000 pts goal</span>
+            <div class="score-plot" aria-hidden="true">
+              <canvas id="score-curve"></canvas>
+              <div class="score-axis"><span id="score-start"></span><span id="score-end"></span></div>
+            </div>
+            <progress id="task-meter" max="1" value="0"></progress>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="moving-screen">
+      <video id="flight-video" width="640" height="360" playsinline muted preload="metadata" poster="assets/praxis-poster.webp" aria-label="Silent Praxis Fighter X gameplay replay">
+        <source data-src="assets/praxis-replay.mp4" type="video/mp4"><source data-src="assets/praxis-replay.webm" type="video/webm">
+      </video>
+      <div class="steering-readout" id="steering-readout">
+        <span class="steering-arrow" aria-hidden="true">·</span>
+        <span class="steering-detail"><small>Direction</small><strong>Awaiting input</strong></span>
+      </div>
+      <div class="guides" aria-hidden="true">
+        <div class="hull-guide" hidden><span>Hull estimate</span></div>
+        <div class="threat-guide" hidden><span>Mean threat x</span></div>
+      </div>
+    </div>
+    <div id="opening-shade" aria-hidden="true"></div>
+    <div id="pulled-frame" aria-hidden="true"><img src="assets/praxis-model-input.webp" alt=""></div>
+    <div class="cover-card">
+      <h1 id="project-name">Auto<span>PILOT</span></h1>
+      <p class="flight-subtitle">A Visual Agent Harness for Real-Time Gameplay</p>
+      <div class="cover-byline">
+        <ul class="byline-names" role="list" aria-label="Authors">
+          <li>Mark Zhao<sup>1,2*†</sup></li>
+          <li>Pengcheng Wang<sup>1*</sup></li>
+          <li>Rui Yang<sup>1*</sup></li>
+          <li>Jiarui Yao<sup>1</sup></li>
+          <li>Xirui Jiang<sup>1</sup></li>
+          <li>Yuxi Chen<sup>1</sup></li>
+          <li>Bingxuan Li<sup>1</sup></li>
+          <li>Hanyang Chen<sup>1</sup></li>
+          <li>Ke Yang<sup>1</sup></li>
+          <li>Manling Li<sup>3</sup></li>
+          <li>Tong Zhang<sup>1</sup></li>
+          <li>Huan Zhang<sup>1</sup></li>
+        </ul>
+        <ul class="byline-schools" aria-label="Affiliations" role="list">
+          <li><sup>1</sup> University of Illinois Urbana-Champaign</li>
+          <li><sup>2</sup> Georgia Institute of Technology</li>
+          <li><sup>3</sup> Northwestern University</li>
+        </ul>
+        <p class="byline-notes">* Equal contribution. † Work done as an intern at UIUC.</p>
+      </div>
+      <p class="flight-summary">The game runs during model calls. With AutoPILOT, a model-written controller reads the screen and acts between calls.</p>
+      <div class="cover-actions"><a class="compare-primary" href="#comparison">Compare gameplay</a><a href="assets/autopilot.pdf">Paper PDF</a><a href="https://github.com/markyyds/autopilot_harness">Code coming soon</a></div>
+    </div>
+
+    <div class="flight-footer">
+      <div class="transport">
+        <button type="button" id="play-replay" aria-label="Play replay" title="Play replay">▶</button>
+        
+        <button type="button" id="guides-toggle" aria-pressed="true">Pixel guides</button>
+        <button type="button" id="jump-goal">Score target</button>
+      </div>
+      <nav class="scene-nav" aria-label="Replay scenes"><button type="button" data-scene-link="0" aria-pressed="true">Overview</button><button type="button" data-scene-link="1" aria-pressed="false">Single-step harness</button><button type="button" data-scene-link="2" aria-pressed="false">Closed-loop controller</button></nav>
+    </div>
+    <noscript><a class="fallback" href="assets/praxis-replay.mp4">Watch the gameplay replay</a></noscript>
+  </div>
+</section>
+<dialog class="replay-dialog" id="source-dialog" aria-labelledby="source-title">
+  <div class="dialog-heading"><h2 id="source-title">Recorded Python controller</h2><form method="dialog"><button>Close</button></form></div>
+  <p>Praxis Fighter X · GPT-6.1 Sol · Low effort. This is the complete function from the original run and the re-enactment. The harness supplies <code>api</code>.</p>
+  <pre tabindex="0"><code id="expanded-code"></code></pre>
+  <a href="assets/praxis-controller.py" download>Download Python source</a>
+</dialog>
+<dialog class="replay-dialog keyboard-dialog" id="keyboard-dialog" aria-labelledby="keyboard-title">
+  <div class="dialog-heading"><h2 id="keyboard-title">Recorded keyboard</h2><form method="dialog"><button>Close</button></form></div>
+  <p>Keys light up for the duration requested in the replay.</p>
+  <svg class="key-surface" viewBox="0 0 462 132" aria-hidden="true"><use href="#keyboard-layout"></use></svg>
+  <output id="expanded-keys" aria-label="Requested keys">—</output>
+</dialog>
+<section id="comparison" aria-label="VISTA vs AutoPILOT">
+<template shadowrootmode="open">
+<link rel="stylesheet" href="paired-replay.css">
+<section id="duel">
+<div class="stage">
+  <div class="top"><h2>VISTA vs AutoPILOT</h2><div class="cases" id="cases"></div><div class="deck">
+    <button class="play" id="play">Play</button>
+    <div class="seg" id="speed" role="group" aria-label="Playback speed"><button data-v="1" aria-pressed="true">1× real time</button><button data-v="6" aria-pressed="false">6×</button><button data-v="20" aria-pressed="false">20×</button></div>
+    <div class="now" id="now">0:00</div>
+  </div></div>
+  <div class="arena">
+    <div class="side v">
+      <div class="sidehead"><b>VISTA</b><span id="v-sub"></span></div>
+      <div class="scr" id="v-scr"><div class="chip" id="v-chip"></div><div class="dead" id="v-dead"><b></b><span></span></div><div class="stamp out" id="v-stamp" hidden></div></div>
+      <div class="mid"><div class="pad" id="v-pad"></div><div class="gauges"><div><b id="v-run">0%</b><span>progress</span></div><div><b id="v-resp">0</b><span>responses</span></div><div><b id="v-in">0</b><span>steps</span></div><div class="dk"><b id="v-rst">0</b><span>deaths</span></div></div></div>
+      <div class="bar" id="v-barbox"><i id="v-bar"></i></div>
+      <div class="term" id="v-term" aria-label="VISTA model output"></div>
+    </div>
+    <div class="side a">
+      <div class="sidehead"><b>AutoPILOT</b><span id="a-sub"></span></div>
+      <div class="scr" id="a-scr"><div class="chip" id="a-chip"></div><div class="dead" id="a-dead"><b></b><span></span></div><div class="stamp win" id="a-stamp" hidden></div></div>
+      <div class="mid"><div class="pad" id="a-pad"></div><div class="gauges"><div><b id="a-run">0%</b><span>progress</span></div><div><b id="a-resp">0</b><span>responses</span></div><div><b id="a-in">0</b><span>steps</span></div><div class="dk"><b id="a-rst">0</b><span>deaths</span></div></div></div>
+      <div class="bar" id="a-barbox"><i id="a-bar"></i></div>
+      <div class="term" id="a-term" aria-label="AutoPILOT model output"></div>
+    </div>
+    <div class="ctrl"><div class="ctrlh"><b>AutoPILOT controller</b><span id="c-state">No controller is running; the model sends each step itself.</span></div><div class="codebox" id="codebox"></div></div>
+  </div>
+  <svg class="race" id="race" tabindex="0" viewBox="0 0 1000 170" role="img" aria-label="Live progress over time for VISTA and AutoPILOT, with every environment step marked"></svg>
+</div>
+</section>
+<p id="c-note"></p>
+<a class="inspector" href="?scene=controller" hidden>Inspect the Praxis controller ↗</a>
+</template>
+</section>
+<div class="replay-endnote">
+  <details class="wrap">
+    <summary>About this replay</summary>
+    <p>Original VISTA input alongside a re-enactment of recorded responses. Overlays estimate positions from pixels. Keys show requested inputs. AutoPILOT reached the target at 1:25.77 in the replay and 2:00.76 in the original run (wall time).</p>
+  </details>
+</div>
+<section id="abstract" class="paper-intro wrap" aria-labelledby="abstract-heading">
+  <div class="paper-abstract">
+    <h2 id="abstract-heading">Abstract</h2>
+    <p class="abstract-opening">Multimodal foundation models can play video games well when the game waits for them, but often fail when it keeps running.</p>
+    <p>We find that much of this gap lies in the harness, which decides what the model sees, what it remembers, and how its outputs become actions over time. Existing harnesses such as VISTA improve the first two, yet turn each model call into at most one action, so the agent acts only as often as its model thinks. We introduce AutoPILOT, which changes the third: in each model call, the model can send a primitive action, start an open-loop macro, or write a closed-loop controller that keeps playing from the screen without further model calls until it hands control back.</p>
+    <p>To evaluate agents in real-time games, we build AFK-Bench, 120 diverse browser games grouped by how they respond to inaction and playable in real time or with the clock paused. With GPT-6.1 Sol under the same budgets, AutoPILOT reaches 68.6% real-time success against 38.3% for VISTA, and on GameWorld it keeps 80.0% in real time while VISTA drops from 84.1% to 42.9%. Its gains hold across closed and open-source models, and it reaches VISTA&#x27;s final success rate at a fifth of its API cost. Our results suggest that how a harness turns model outputs into actions over time is a central yet underexplored part of agent design, and we hope AutoPILOT and AFK-Bench will serve as a foundation for agents in a world that does not wait.</p>
+  </div>
+</section>
+<section id="method" class="section wrap">
+<h2>Three execution modes</h2><p class="lead">With GPT-6.1 Sol at low effort, median model latency was 6.1 s. The median interval between controller actions was 0.41 s.</p>
+<div class="modes"><article><code>act</code><h3>Primitive action</h3><p>Send one action. Stops any running macro or controller.</p></article><article><code>run_macro</code><h3>Open-loop macro</h3><p>Execute a sequence of actions without reading the screen.</p></article><article><code>python</code><h3>Closed-loop controller</h3><p>Run model-written Python that reads frames, acts and can hand control back.</p></article></div>
+<div class="delegation-analysis"><h3>When does the model delegate?</h3>
+<p>With GPT-6.1 Sol in real time, controllers send 98% of environment steps in hostile games and 89% in benign games. In turn-based games, where the model can plan ahead, open-loop macros account for 36% of tool calls and 26% of environment steps.</p>
+<p>Removing controllers lowers hostile real-time success from 62.5% to 50.8%. Removing macros has its largest effect in turn-based games, where success falls from 83.3% to 78.3%.</p></div>
+<figure class="paperfig"><a href="assets/teaser.pdf" aria-label="Open the full-resolution Praxis Fighter X figure"><img src="assets/teaser.webp" loading="lazy" alt="Single-step and delegated play on Praxis Fighter X, with a timeline of the first 90 seconds."></a><figcaption><strong>Praxis Fighter X.</strong> Replay: controller starts at 0:43.58 and reaches the target at 1:25.77. <a href="assets/teaser.pdf">Full figure (PDF)</a></figcaption></figure>
+</section>
+<div class="wash"><section id="cases" class="section wrap"><h2>Case studies</h2><div class="switch" role="group" aria-label="Choose case study"><button aria-pressed="true" data-case="radius">Radius Raid</button><button aria-pressed="false" data-case="trichromat">Trichromat</button></div>
+<div id="case-radius"><p><strong>Radius Raid.</strong> The controller tracks enemies by color and takes 58 of 59 steps. AutoPILOT wins at 1:02 in three model calls.</p><figure class="paperfig"><a href="assets/case_radius.pdf"><img loading="lazy" src="assets/case_radius.webp" alt="Radius Raid screenshots, controller excerpt and the trajectories of AutoPILOT and VISTA."></a><figcaption><a href="assets/case_radius.pdf">Full Radius Raid figure (PDF)</a></figcaption></figure></div>
+<div id="case-trichromat" hidden><p><strong>Trichromat.</strong> The model uses Python to plan moves. Controllers and one macro execute 180 of 182 steps. AutoPILOT clears all three rooms by 3:16 with 14 model calls.</p><figure class="paperfig"><a href="assets/case_trichromat.pdf"><img loading="lazy" src="assets/case_trichromat.webp" alt="Trichromat screenshots, a puzzle-solving controller and the trajectories through three rooms."></a><figcaption><a href="assets/case_trichromat.pdf">Full Trichromat figure (PDF)</a></figcaption></figure></div></section></div>
+<section class="section wrap" id="results"><h2>Results</h2><p class="lead">With GPT-6.1 Sol, real-time success on AFK-Bench is 68.6% for AutoPILOT and 38.3% for VISTA.</p>
+<p class="clock-analysis">Switching from a paused clock to real time lowers success by 4.5 percentage points for AutoPILOT and 17.8 for VISTA. Even with the clock paused, AutoPILOT leads by 17.0 points. A macro or controller can carry out many steps per model call.</p><section class="afk-board" id="afk-comparison" aria-labelledby="afk-title">
+  <header class="afk-cover">
+    <div class="afk-cover-copy"><h3 id="afk-title">AFK-Bench <span>comparison</span></h3><canvas class="afk-particles" aria-hidden="true"></canvas><p>120 games <span>·</span> 40 per environment type</p></div>
+    <div class="afk-slices" role="group" aria-label="Sort leaderboard by environment">
+      <button type="button" class="afk-slice" data-sort="3" data-active="true"><span class="afk-emblem" aria-hidden="true"><i></i><i></i><i></i></span><span class="afk-slice-label">Overall<span class="afk-arrow" aria-hidden="true">↓</span></span></button>
+      <button type="button" class="afk-slice" data-sort="0" data-active="false"><img src="assets/praxis.webp" alt=""><span class="afk-slice-label">Hostile<span class="afk-arrow" aria-hidden="true">↕</span></span></button>
+      <button type="button" class="afk-slice" data-sort="1" data-active="false"><img src="assets/truck.webp" alt=""><span class="afk-slice-label">Benign<span class="afk-arrow" aria-hidden="true">↕</span></span></button>
+      <button type="button" class="afk-slice" data-sort="2" data-active="false"><img src="assets/trichromat.webp" alt=""><span class="afk-slice-label">Turn-based<span class="afk-arrow" aria-hidden="true">↕</span></span></button>
+    </div>
+  </header>
+  <div class="afk-tools">
+    <fieldset class="afk-clock" id="clock"><legend>Game clock</legend>
+      <label><input type="radio" name="afk-clock" value="Real time" checked><span>Real time</span></label>
+      <label><input type="radio" name="afk-clock" value="Paused"><span>Paused</span></label>
+    </fieldset>
+    <label class="afk-ranking">Metric <select id="metric"><option>Success rate</option><option>Mean progress</option></select></label>
+  </div>
+  <div class="afk-scroll" tabindex="0" role="region" aria-label="AFK-Bench model comparison">
+    <table class="afk-table">
+      <thead><tr><th scope="col">Rank</th><th scope="col">Model / Effort</th><th scope="col">Harness</th><th scope="col" aria-sort="descending"><button type="button" class="afk-sort" data-sort="3">Overall <span class="afk-arrow" aria-hidden="true">↓</span></button></th><th scope="col"><button type="button" class="afk-sort" data-sort="0">Hostile <span class="afk-arrow" aria-hidden="true">↕</span></button></th><th scope="col"><button type="button" class="afk-sort" data-sort="1">Benign <span class="afk-arrow" aria-hidden="true">↕</span></button></th><th scope="col"><button type="button" class="afk-sort" data-sort="2">Turn-based <span class="afk-arrow" aria-hidden="true">↕</span></button></th></tr></thead>
+      <tbody id="scores"></tbody>
+    </table>
+  </div>
+  <div class="afk-foot"><span class="afk-note" id="metric-note" aria-live="polite"></span>
+    <details><summary>Evaluation protocol</summary><p>Each episode allows 100 model calls, 2,000 environment steps and 2,000 seconds of game time. GPT-6.1 Sol ran three episodes per game, other models one. GPT-6 Astra and Claude Fable 5.2 were evaluated with AutoPILOT in real time at low and high effort.</p></details>
+  </div>
+</section>
+<div class="transfer"><div><h3>Transfer to GameWorld</h3><p>AutoPILOT with GPT-6.1 Sol solves 80.0% of 170 tasks in real time across 34 games.</p></div><div class="scroll" tabindex="0" aria-label="GameWorld success rates"><table><thead><tr><th>Model</th><th>Harness</th><th>Paused</th><th>Real time</th></tr></thead><tbody>
+<tr><th>GPT-6.1 Sol</th><td>AutoPILOT</td><td>82.9%</td><td>80.0%</td></tr><tr><th>GPT-6.1 Sol</th><td>VISTA</td><td>84.1%</td><td>42.9%</td></tr>
+<tr><th>Claude Opus 5.5</th><td>AutoPILOT</td><td>72.4%</td><td>67.6%</td></tr><tr><th>Claude Opus 5.5</th><td>VISTA</td><td>67.1%</td><td>41.2%</td></tr></tbody></table></div></div>
+</section>
+<section class="section wrap analysis" id="analysis" aria-labelledby="analysis-title">
+  <div class="analysis-heading"><h2 id="analysis-title">Analysis</h2><a href="assets/results_curves_2x2.pdf">Full figure (PDF)</a></div>
+  <nav class="analysis-links" aria-label="Analysis topics"><a href="#recovery">Recovery</a><a href="#model-calls">Model-call budget</a><a href="#generation-speed">Generation speed</a><a href="#api-cost">API cost</a></nav>
+
+  <section class="analysis-row" id="recovery" aria-labelledby="recovery-title">
+    <div><h3 id="recovery-title">Recovery from failures</h3>
+      <p>On hostile real-time games, GPT-6.1 Sol wins on the first attempt in 11.7% of episodes with AutoPILOT and 8.3% with VISTA. Within 20 restarts, success reaches <strong>54.2% and 15.8%</strong>, respectively.</p>
+      <p>A life lasts about as long under both harnesses, but costs a median of two model calls with AutoPILOT and eight with VISTA. That leaves AutoPILOT more calls to retry. Among the 123 paired episodes in which both harnesses restarted, AutoPILOT won 71 and VISTA won seven.</p>
+    </div>
+    <figure><img src="assets/analysis-recovery.webp" loading="lazy" width="864" height="544" alt="Cumulative success within a given number of restarts. AutoPILOT continues gaining on hostile games after VISTA levels off."><figcaption>GPT-6.1 Sol. Solid lines cover all 120 games, dotted lines the 40 hostile games. Green is AutoPILOT, orange is VISTA.</figcaption></figure>
+  </section>
+
+  <section class="analysis-row" id="model-calls" aria-labelledby="calls-title">
+    <div><h3 id="calls-title">Model-call budget</h3>
+      <p>In the main real-time runs, AutoPILOT averaged <strong>681 environment steps from 43 model calls</strong> with GPT-6.1 Sol. VISTA averaged 78 steps per episode. It exhausted its 100 calls in 208 of its 222 failed episodes.</p>
+      <p>The budget experiment used one episode per game. Raising the limit from 100 to 300 calls lifted VISTA from 37.5% to 55.0% success. AutoPILOT went from 69.2% to 71.7%. In the 300-call runs, AutoPILOT had already reached 55.0% within 50 calls.</p>
+    </div>
+    <figure><img src="assets/analysis-calls.webp" loading="lazy" width="841" height="544" alt="Success within the first 50, 100, 200 or 300 model calls. AutoPILOT reaches VISTA’s final success rate within 50 calls."><figcaption>GPT-6.1 Sol, 300-call budget. Solid lines cover all games, dotted lines hostile games. Green is AutoPILOT, orange is VISTA.</figcaption></figure>
+  </section>
+
+  <section class="analysis-row" id="generation-speed" aria-labelledby="speed-title">
+    <div><h3 id="speed-title">Generation speed</h3>
+      <p>On the 80 hostile and benign real-time tasks, GPT-6.1 Sol at low effort reached <strong>55.0% at 10 tokens/s</strong> with AutoPILOT and 63.8% at 200 tokens/s. VISTA reached 38.8% at 200 tokens/s and 57.5% with the clock paused.</p>
+      <p>The experiment simulates decoding speed by advancing the game clock according to the number of output tokens. Slower generation delays the start of a controller. Once running, the controller reads frames and acts at its own pace.</p>
+    </div>
+    <figure><img src="assets/analysis-speed.webp" loading="lazy" width="864" height="552" alt="Success across simulated decoding speeds. The infinity symbol marks the paused-clock condition."><figcaption>Circles show GPT-6.1 Sol, triangles Claude Opus 5.5. Green is AutoPILOT, orange is VISTA. ∞ denotes a paused clock.</figcaption></figure>
+  </section>
+
+  <section class="analysis-row" id="api-cost" aria-labelledby="cost-title">
+    <div><h3 id="cost-title">API cost at matched success</h3>
+      <p>With GPT-6.1 Sol, AutoPILOT first matched VISTA’s final success rate at a total list-price API cost of <strong>$37</strong>. VISTA spent <strong>$180</strong>. With Claude Opus 5.5, the corresponding totals were $75 and $369.</p>
+      <p>The curve raises the spending cap per episode and sums costs across all 120 tasks. The white ring marks where AutoPILOT first reaches VISTA’s final success rate. Each arrow spans the difference in total spending at that success rate.</p>
+    </div>
+    <figure><img src="assets/analysis-cost.webp" loading="lazy" width="841" height="552" alt="Success against total API cost. Both models reach VISTA’s final success rate with AutoPILOT at about one fifth of the cost."><figcaption>Circles show GPT-6.1 Sol, triangles Claude Opus 5.5. Green is AutoPILOT, orange is VISTA.</figcaption></figure>
+  </section>
+</section>
+
+<div class="wash"><section class="section wrap" id="benchmark"><h2>Inside AFK-Bench</h2><p class="lead">120 games grouped by the cost of inaction. Each group has 40 games, with one task per game.</p>
+<div class="groups"><article><img src="assets/praxis.webp" alt="Praxis Fighter X gameplay" loading="lazy"><div><h3>Hostile real-time</h3><p>Standing still can cost health, a life or the attempt.</p></div></article><article><img src="assets/truck.webp" alt="Tiny Truck Racing gameplay" loading="lazy"><div><h3>Benign real-time</h3><p>The world keeps moving while an idle player remains safe.</p></div></article><article><img src="assets/trichromat.webp" alt="Trichromat gameplay" loading="lazy"><div><h3>Turn-based</h3><p>The world advances only when the player acts.</p></div></article></div>
+<details class="catalog"><summary>Browse all 120 games</summary><div class="catalog-inner"><p>Wins with the clock running, out of three GPT-6.1 Sol episodes per game.</p><div class="controls"><label>Game name<input id="search" type="search" placeholder="Search games"></label><label>Environment<select id="group"><option>All environments</option><option>Hostile real-time</option><option>Benign real-time</option><option>Turn-based</option></select></label></div><p class="meta" id="count" aria-live="polite"></p><div class="scroll games-table" tabindex="0" aria-label="Game results"><table><thead><tr><th>Game</th><th>Environment</th><th>VISTA wins</th><th>AutoPILOT wins</th></tr></thead><tbody id="games"></tbody></table></div></div></details>
+</section></div>
+<section class="section wrap" id="citation"><h2>Citation</h2><pre><code>@misc{zhao2026autopilot,
+  title = {{AutoPILOT}: A Visual Agent Harness for Real-Time Gameplay},
+  author = {Mark Zhao and
+            Pengcheng Wang and
+            Rui Yang and
+            Jiarui Yao and
+            Xirui Jiang and
+            Yuxi Chen and
+            Bingxuan Li and
+            Hanyang Chen and
+            Ke Yang and
+            Manling Li and
+            Tong Zhang and
+            Huan Zhang},
+  year = {2026}
+}</code></pre></section>
+</main><footer class="wrap"><a href="#main">AutoPILOT</a><span>Project page design reference · <a href="https://game2player.github.io/">Game2Player</a></span></footer>
+</body></html>
